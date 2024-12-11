@@ -80,28 +80,46 @@ move(300)
 turn(30)
 move(420)
 turn(-15)
-move(350)
-turn(34)
-move(500)
+move(340)
+turn(35)
+move(470)
 turn(85)
-move(970)
+move(940)
 turn(0)
 
 
-move(130)
+move(100)
 
 
 jobb_feltet.on_for_degrees(5, -250)
 
-turn(90)
+turn(95)
 
-move(850)
-move(780)
-turn(180)
 move(1200)
-turn(130)
-move(-200)
-move(600)
+
+turn(80)
+
+move(400)
+
+turn(180)
+
+move(1000)
+
+turn(135)
+
+move(-600)
+
+sleep(0.5)
+
+move(2000)
+
+# move(850)
+# move(780)
+# turn(180)
+# move(1200)
+# turn(130)
+# move(-200)
+# move(600)
 
 # sleep(2)
 
