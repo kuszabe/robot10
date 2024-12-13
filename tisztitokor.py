@@ -28,7 +28,7 @@ g.calibrate()
 
 #fancy move function
 #implement easing
-def turn(degree, speed = 0.5, easein= 60, easeout = 120):
+def turn(degree, speed = 0.8, easein= 60, easeout = 100):
     maxdistance = degree - g.angle
     while True:
         distance = degree - g.angle
@@ -49,7 +49,7 @@ def turn(degree, speed = 0.5, easein= 60, easeout = 120):
         print("elcseszte", g.angle)
     m.off()
 
-def move(dist, speed = 0.5, easein = 100, easeout = 150):
+def move(dist, speed = 0.5, easein = 100, easeout = 100):
     startpos = (mr.position + ml.position) / 2
     endpos = startpos + dist
     maxdistance = endpos - startpos
@@ -81,51 +81,48 @@ turn(30)
 move(420)
 turn(-15)
 move(340)
-turn(35)
-move(470)
-turn(85)
-move(940)
-turn(0)
+
+#collects the two
+turn(34)
+move(500)
+
+#to the part where it uses the lift
+turn(70)
+move(300)
+turn(90)
+move(670)
+turn(0, speed=0.4)
 
 
-move(100)
+move(120, speed=0.3)
+
+#actual lifting
+jobb_feltet.on_for_degrees(20, -250)
 
 
-jobb_feltet.on_for_degrees(5, -250)
+sleep(0.3)
 
-turn(95)
+turn(95, speed=0.3)
 
-move(1200)
+move(1200, speed=0.8)
 
 turn(80)
 
 move(400)
 
-turn(180)
+turn(180, speed=0.3)
 
-move(1000)
+sleep(60)
+
+move(1000, speed=0.8)
 
 turn(135)
 
-move(-600)
+move(-500, speed=0.8)
 
 sleep(0.5)
 
-move(2000)
-
-# move(850)
-# move(780)
-# turn(180)
-# move(1200)
-# turn(130)
-# move(-200)
-# move(600)
-
-# sleep(2)
-
-# turn(95)
-
-# move_with_ease(1500, easeout=300)
+move(1000, speed=0.9)
 
 
 
