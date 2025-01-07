@@ -48,11 +48,11 @@ def turn(degree, speed = 0.5, easein= 60, easeout = 120):
         print("elcseszte", g.angle)
     m.off()
 
-def move(dist, speed = 0.5, easein = 100, easeout = 200):
+def move(dist, speed = 0.5, easein = 100, easeout = 100, startgyro = g.angle):
     startpos = (mr.position + ml.position) / 2
     endpos = startpos + dist
     maxdistance = endpos - startpos
-    startgyro = g.angle
+    print(startgyro)
     while True:
         currentpos = (mr.position + ml.position) / 2
         distance = endpos - currentpos
@@ -68,23 +68,47 @@ def move(dist, speed = 0.5, easein = 100, easeout = 200):
             sign = distance / helper.abs(distance)
             move = helper.clamp(speed * 100 * sign, -100, 100)
         gyrooffset = startgyro - g.angle
-        m.on(move+gyrooffset/2, move-gyrooffset/2)
-            
+        m.on(helper.clamp(move+gyrooffset, -100, 100), helper.clamp(move-gyrooffset, -100, 100))
+        # m.on(move, move)
         print(g.angle, startgyro)
     m.off()
 
 
-move(600)
-turn(90)
-move(300)
-turn(0)
-move(200, speed=0.3, easeout=100)
-turn(-90)
-move(300)
-turn(0)
-move(-800)
+# def steer(angle, steer, speed = 0.5, chain = False):
+#     while True:
+#         if helper.abs(g.angle - angle) < 2 and chain:
+#             print("bye bye")
+#             break
+#         if g.angle - angle == 0:
+#             print("bye bye 2")
+#             break
+#         curspeed = speed*100 if chain else helper.clamp(abs(angle - g.angle) * speed, 5, 100 - abs(steer))
+#         print(g.angle, curspeed, chain)
+#         m.on(curspeed + steer, curspeed- steer)
+#     m.off(brake=not chain)
 
+
+def steer(angle, steer, speed = 0.5):
+    while True:
+        curspeed = speed * helper.clamp(abs(g.angle - angle) * 2, 0, 100)
+        if angle < g.angle:
+            m.on(curspeed - steer, curspeed + steer)
+        elif angle > g.angle:
+            m.on(curspeed + steer, curspeed - steer)
+        print(g.angle, curspeed)
+        if abs(angle - g.angle) < 2:
+            break
+    m.off()
+    print("kész", g.angle)
+
+steer(-60, 10)
+
+# turn(-60)
+
+sleep(5)
+
+print(g.angle)
 
 m.off(brake=False)
 
-print(run_time())
+print("done in", round(run_time()))
