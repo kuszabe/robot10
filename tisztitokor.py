@@ -83,14 +83,14 @@ turn(-15)
 move(340)
 
 #collects the two
-turn(34)
+turn(30)
 move(500)
 
 #to the part where it uses the lift
-turn(70)
+turn(65)
 move(300)
 turn(90)
-move(670)
+move(700    )
 turn(0, speed=0.4)
 
 
@@ -100,17 +100,17 @@ move(120, speed=0.3)
 jobb_feltet.on_for_degrees(20, -250)
 
 
-sleep(0.3)
+sleep(0.5)
 
 turn(95, speed=0.3)
 
-sleep(10)
+# sleep(10)
 
 move(1200, speed=0.8, easeout=300)
 
 turn(80)
 
-move(400)
+move(550)
 
 turn(180, speed=0.3)
 
@@ -124,7 +124,9 @@ sleep(0.5)
 
 move(1000, speed=0.9)
 
+turn(100)
 
+move(200, speed=0.9)
 
 m.off(brake=False)
 jobb_feltet.off(brake=False)
