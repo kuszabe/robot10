@@ -12,14 +12,13 @@ import math
 
 import helper
 
-from ev3dev2.motor import MoveTank, LargeMotor, MediumMotor
+from ev3dev2.motor import MoveTank, LargeMotor
 from ev3dev2.sensor.lego import GyroSensor
 
 m = MoveTank("D", "A")
 ml = LargeMotor("D")
 mr = LargeMotor("A")
 g = GyroSensor("in2")
-jobb_feltet = MediumMotor("B")
 
 
 
@@ -28,7 +27,7 @@ g.calibrate()
 
 #fancy move function
 #implement easing
-def turn(degree, speed = 0.8, easein= 60, easeout = 100):
+def turn(degree, speed = 0.5, easein= 60, easeout = 120):
     maxdistance = degree - g.angle
     while True:
         distance = degree - g.angle
@@ -49,11 +48,11 @@ def turn(degree, speed = 0.8, easein= 60, easeout = 100):
         print("elcseszte", g.angle)
     m.off()
 
-def move(dist, speed = 0.5, easein = 100, easeout = 100):
+def move(dist, speed = 0.5, easein = 100, easeout = 100, startgyro = g.angle):
     startpos = (mr.position + ml.position) / 2
     endpos = startpos + dist
     maxdistance = endpos - startpos
-    startgyro = g.angle
+    print(startgyro)
     while True:
         currentpos = (mr.position + ml.position) / 2
         distance = endpos - currentpos
@@ -75,57 +74,27 @@ def move(dist, speed = 0.5, easein = 100, easeout = 100):
     m.off()
 
 
+def steer(angle, steer, speed = 0.5, chain = False):
+    while True:
+        if helper.abs(g.angle - angle) < 2 and chain:
+            print("bye bye")
+            break
+        if g.angle - angle == 0:
+            print("bye bye 2")
+            break
+        curspeed = speed*100 if chain else helper.clamp(angle - g.angle, -100, 100) * speed
+        print(g.angle, curspeed, chain)
+        m.on(curspeed + steer, curspeed- steer)
+    m.off(brake=not chain)
 
-move(300)
-turn(30)
-move(420)
-turn(-15)
-move(340)
+steer(20, 5, chain= True)
 
-#collects the two
-turn(34)
-move(500)
+steer(0, -5, chain= True)
 
-#to the part where it uses the lift
-turn(70)
-move(300)
-turn(90)
-move(670)
-turn(0, speed=0.4)
+move(200, easein=1, startgyro=0)
 
-
-move(120, speed=0.3)
-
-#actual lifting
-jobb_feltet.on_for_degrees(20, -250)
-
-
-sleep(0.3)
-
-turn(95, speed=0.3)
-
-sleep(10)
-
-move(1200, speed=0.8, easeout=300)
-
-turn(80)
-
-move(400)
-
-turn(180, speed=0.3)
-
-move(1000, speed=0.8)
-
-turn(135)
-
-move(-500, speed=0.8)
-
-sleep(0.5)
-
-move(1000, speed=0.9)
-
-
+sleep(2)
 
 m.off(brake=False)
-jobb_feltet.off(brake=False)
-print(run_time())
+
+print("done in", round(run_time(), 1))
