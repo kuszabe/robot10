@@ -79,61 +79,56 @@ def move(dist, speed = 0.5, easein = 100, easeout = 200, startgyro = None):
     m.off()
 
 
-def steer(angle, steer, speed = 0.5):
-    startdist = angle - g.angle
+def move_steer(dist, angle, maxturn = 10, speed = 0.5, easein = 100, easeout = 100):
+    startpos = (mr.position + ml.position) / 2
+    endpos = startpos + dist
+    maxdistance = endpos - startpos
+    print(angle)
     while True:
-        if startdist > 0 and angle < g.angle:
+        currentpos = (mr.position + ml.position) / 2
+        distance = endpos - currentpos
+        steer = helper.clamp(angle - g.angle, -maxturn, maxturn)
+        if helper.abs(distance) < 3:
             break
-        elif startdist < 0 and angle > g.angle:
-            break
-        curspeed = speed * helper.clamp(abs(g.angle - angle) * 2, 0, 100)
-        if angle < g.angle:
-            m.on(curspeed - steer, curspeed + steer)
-        elif angle > g.angle:
-            m.on(curspeed + steer, curspeed - steer)
-        print(g.angle, curspeed)
-        if abs(angle - g.angle) < 2:
-            break
+        if helper.abs(distance) < easeout:
+            move = distance * speed * (100/easeout)
+        elif helper.abs(distance) > helper.abs(maxdistance) - easein:
+            move = helper.clamp((helper.abs(maxdistance) - helper.abs(distance)), -100, 100)
+            sign = distance / helper.abs(distance)
+            move = helper.clamp((move * speed * (100/easein) + 5) * sign, -100, 100)
+            steer = 0
+        else:
+            sign = distance / helper.abs(distance)
+            move = helper.clamp(speed * 100 * sign, -100, 100)
+        m.on(helper.clamp(move+steer, -100, 100), helper.clamp(move-steer, -100, 100))
     m.off()
-    print("kész", g.angle)
+
 
 
 ##futás kód
 
 move(480, startgyro=2)
 full_emeles = run_time()
-bal_feltet.on_for_rotations(100, 22.5, block=False)
+bal_feltet.on_for_rotations(100, -10.7, block=False)
 turn(0)
-sleep(3)
-move(330, speed=0.08, startgyro=1, easeout=1)
+move(330, speed=0.15, startgyro=1)
 full_emeles = run_time() - full_emeles
-bal_feltet.on_for_rotations(100, -5)
+bal_feltet.on_for_rotations(100, 2.5)
 
 move(-110)
 turn(28)
-move(225)
-bal_feltet.on_for_rotations(100, -13)
+move(250)
+bal_feltet.on_for_rotations(100, 6)
 turn(15, easeout=1)
 
-bal_feltet.on_for_rotations(100, 12)
-sleep(0.5)
+bal_feltet.on_for_rotations(100, -6)
 move(135)
 turn(-5)
-bal_feltet.on_for_rotations(100, 5)
-turn(55)
-# bal_feltet.on_for_rotations(100, -2, block=False)
-sleep(5)
-move(670)
-turn(35)
-move(-30)
-bal_feltet.on_for_rotations(100, -5)
-
+bal_feltet.on_for_rotations(100, -2.5)
 turn(50)
-move(-100)
-turn(15)
-bal_feltet.on_for_rotations(100, -12, block=False)
-move(200)
-sleep(10)
+move_steer(750, 0, easein=50, maxturn=15)
+turn(90)
+
 
 
 m.off(brake=False)
