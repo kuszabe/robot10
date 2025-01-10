@@ -8,8 +8,6 @@ starttime = time.time()
 def run_time():
     return time.time() - starttime
 
-import math
-
 import helper
 
 from ev3dev2.motor import MoveTank, LargeMotor, MediumMotor
@@ -19,7 +17,7 @@ m = MoveTank("D", "A")
 ml = LargeMotor("D")
 mr = LargeMotor("A")
 g = GyroSensor("in2")
-jobb_feltet = MediumMotor("B")
+bal_feltet = MediumMotor("C")
 
 
 
@@ -28,14 +26,16 @@ g.calibrate()
 
 #fancy move function
 #implement easing
-def turn(degree, speed = 0.8, easein= 60, easeout = 100):
+def turn(degree, speed = 0.5, easein= 60, easeout = 120):
+    MIN_MOVE = 5
     maxdistance = degree - g.angle
     while True:
         distance = degree - g.angle
         if distance == 0:
             break
         if helper.abs(distance) < easeout:
-            move = distance * speed * (100/easeout)
+            sign = distance/helper.abs(distance)
+            move = helper.clamp(helper.abs(distance) * speed * (100/easeout), MIN_MOVE, 100) * sign
         elif helper.abs(distance) > helper.abs(maxdistance) - easein:
             move = helper.clamp((helper.abs(maxdistance) - helper.abs(distance)), -100, 100)
             sign = distance / helper.abs(distance)
@@ -49,18 +49,22 @@ def turn(degree, speed = 0.8, easein= 60, easeout = 100):
         print("elcseszte", g.angle)
     m.off()
 
-def move(dist, speed = 0.5, easein = 100, easeout = 100):
+def move(dist, speed = 0.5, easein = 100, easeout = 200, startgyro = None):
+    MIN_MOVE = 2
+    if startgyro == None:
+        startgyro = g.angle
     startpos = (mr.position + ml.position) / 2
     endpos = startpos + dist
     maxdistance = endpos - startpos
-    startgyro = g.angle
+    print(startgyro)
     while True:
         currentpos = (mr.position + ml.position) / 2
         distance = endpos - currentpos
         if helper.abs(distance) < 3:
             break
         if helper.abs(distance) < easeout:
-            move = distance * speed * (100/easeout)
+            sign = distance/helper.abs(distance)
+            move = helper.clamp(helper.abs(distance) * speed * (100/easeout), MIN_MOVE, 100) * sign
         elif helper.abs(distance) > helper.abs(maxdistance) - easein:
             move = helper.clamp((helper.abs(maxdistance) - helper.abs(distance)), -100, 100)
             sign = distance / helper.abs(distance)
@@ -76,58 +80,17 @@ def move(dist, speed = 0.5, easein = 100, easeout = 100):
 
 
 
-move(300)
-turn(30)
-move(420)
-turn(-15)
-move(340)
-
-#collects the two
-turn(30)
-move(500)
-
-#to the part where it uses the lift
-turn(65)
-move(300)
-turn(90)
-move(700    )
-turn(0, speed=0.4)
+##futás kód
+move(700)
+turn(-45)
+move(660)
+turn(45)
+move(700, startgyro = 45)
 
 
-move(120, speed=0.3)
-
-#actual lifting
-jobb_feltet.on_for_degrees(20, -250)
-
-
-sleep(0.5)
-
-turn(95, speed=0.3)
-
-# sleep(10)
-
-move(1200, speed=0.8, easeout=300)
-
-turn(80)
-
-move(600)
-
-turn(180, speed=0.3)
-
-move(1000, speed=0.8)
-
-turn(135)
-
-move(-500, speed=0.8)
-
-sleep(0.5)
-
-move(1000, speed=0.9)
-
-turn(100)
-
-move(200, speed=0.9)
 
 m.off(brake=False)
-jobb_feltet.off(brake=False)
-print(run_time())
+
+bal_feltet.off(brake=False)
+
+print("done in", round(run_time(), 1))
