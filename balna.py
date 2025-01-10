@@ -18,6 +18,7 @@ ml = LargeMotor("D")
 mr = LargeMotor("A")
 g = GyroSensor("in2")
 bal_feltet = MediumMotor("C")
+jobb_feltet = MediumMotor("B")
 
 
 
@@ -81,13 +82,26 @@ def move(dist, speed = 0.5, easein = 100, easeout = 200, startgyro = None):
 
 
 ##futás kód
+bal_feltet.off()
+jobb_feltet.off()
+
 move(700)
 turn(-45)
-move(660)
+move(665)
 turn(45)
-move(700, startgyro = 45)
+move(680, startgyro = 45)
+#kiengedi a rákot
+bal_feltet.on_for_degrees(20, -100)
+sleep(1)
+bal_feltet.on_for_degrees(20, 100)
 
+#visszatolat
 
+#párhuzamosan fordul a szonárra
+
+#odamegy a szonár mellé
+
+#
 
 m.off(brake=False)
 
