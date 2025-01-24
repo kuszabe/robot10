@@ -97,11 +97,13 @@ bal_feltet.on_for_degrees(20, 100)
 
 #visszatolat
 
+move(-600)
 #párhuzamosan fordul a szonárra
-
+turn(-53)
 #odamegy a szonár mellé
-
+move(320)
 #
+jobb_feltet.on_for_degrees(20, 300)
 
 m.off(brake=False)
 
