@@ -3,10 +3,7 @@
 from time import sleep
 import time
 
-starttime = time.time()
 
-def run_time():
-    return time.time() - starttime
 
 import helper
 
@@ -47,7 +44,7 @@ def turn(degree, speed = 0.8, easein= 60, easeout = 120):
         print("elcseszte", g.angle)
     m.off()
 
-def move(dist, speed = 0.7, easein = 100, easeout = 200, startgyro = None, CORRECTION_NODIFIER = 0.5):
+def move(dist, speed = 0.7, easein = 100, easeout = 200, startgyro = None, CORRECTION_NODIFIER = 1):
     MIN_MOVE = 2
     if startgyro == None:
         startgyro = g.angle
@@ -108,25 +105,27 @@ def move_with_turn_offset(dist, speed = 0.8, easein = 100, easeout = 200, startg
         print(g.angle, startgyro)
     m.off()
 
-print("started at", round(run_time(), 1))
+starttime = time.time()
+
+def run_time():
+    return time.time() - starttime
 
 try:
     ##futás kód
-    move(1200)
-    turn(2)
-    move(770, startgyro=3, CORRECTION_NODIFIER=3)
-    turn(2)
+    move(2000, CORRECTION_NODIFIER=4)
+    move(-100)
+    turn(20)
+    move(300, startgyro=20)
+    turn(0)
     bal_feltet.on_for_degrees(10, 90)
     bal_feltet.on_for_seconds(10, 1)
-    move(-150, startgyro=0, speed=0.1)
-    move(-600)
+    move(-300, startgyro=0, speed=0.15)
+    move(-400)
     bal_feltet.on_to_position(100, 0, block=False)
-    turn(30)
-    move(800, CORRECTION_NODIFIER=0)
-    turn(0)
-    move(400)
+    turn(20)
+    move(1200, CORRECTION_NODIFIER=0)
     move(-100)
-    sleep(1)
+    
 
 finally:
     m.off(brake=False)
