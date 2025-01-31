@@ -3,6 +3,8 @@
 from time import sleep
 import time
 
+
+
 import helper
 
 from ev3dev2.motor import MoveTank, LargeMotor, MediumMotor
@@ -12,11 +14,9 @@ m = MoveTank("D", "A")
 ml = LargeMotor("D")
 mr = LargeMotor("A")
 g = GyroSensor("in2")
-jobb_feltet = MediumMotor("B")
 bal_feltet = MediumMotor("C")
+jobb_feltet = MediumMotor("B")
 
-
-g.reset()
 g.calibrate()
 
 starttime = time.time()
@@ -24,9 +24,9 @@ starttime = time.time()
 def run_time():
     return time.time() - starttime
 
-#implement easing
-def turn(degree, speed = 0.8, easein= 60, easeout = 120):
-    MIN_MOVE = 5
+def turn(degree, speed = 0.3, easein= 30, easeout = 60):
+    print("turning")
+    MIN_MOVE = 2
     maxdistance = degree - g.angle
     while True:
         distance = degree - g.angle
@@ -46,10 +46,13 @@ def turn(degree, speed = 0.8, easein= 60, easeout = 120):
         # print(g.angle, distance, move)
     if degree != g.angle:
         print("elcseszte", g.angle)
+        if abs(degree - g.angle) > 5:
+            turn(degree)
     m.off()
+    print(g.angle)
 
 
-def move(dist, speed = 0.7, easein = 100, easeout = 200, startgyro = None, CORRECTION_NODIFIER = 1):
+def move(dist, speed = 0.7, easein = 70, easeout = 150, startgyro = None, CORRECTION_NODIFIER = 0.5):
     print("moving")
     MIN_MOVE = 2
     if startgyro == None:
@@ -81,33 +84,24 @@ def move(dist, speed = 0.7, easein = 100, easeout = 200, startgyro = None, CORRE
     m.off()
 
 
-
 ##futás kód
 try:
-    bal_feltet.off()
-    jobb_feltet.off()
 
-    jobb_feltet.on_for_degrees(20, 180, block=False)
-    move(700)
+    move(850)
     turn(-45)
-    move(665)
-    turn(44, speed=0.2)
-    move(680, startgyro = 45)
-    #kiengedi a rákot
-    bal_feltet.on_for_degrees(20, -100)
+    move(460)
+    turn(45)
+    move(595, startgyro=45)
+    jobb_feltet.on_for_degrees(10, 160)
     sleep(1)
-    bal_feltet.on_for_degrees(20, 100)
+    jobb_feltet.on_for_degrees(-10, 160)
+    move(-500)
+    bal_feltet.on_for_degrees(-20, 90)
 
-    #visszatolat
+    turn(0)
+    move(500)
+    bal_feltet.on_for_degrees(-20, 1800)
 
-    move(-600)
-    #párhuzamosan fordul a szonárra
-    turn(-60)
-    #odamegy a szonár mellé
-    jobb_feltet.on_for_degrees(20, 360, block=False)
-    move(450)
-    #
-    jobb_feltet.on_for_degrees(20, 720)
 finally:
     m.off(brake=False)
 
