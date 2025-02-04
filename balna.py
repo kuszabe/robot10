@@ -89,13 +89,13 @@ try:
 
     move(850)
     turn(-45)
-    move(460)
+    move(480)
     turn(45)
-    move(595, startgyro=45)
+    move(605, startgyro=45)
     jobb_feltet.on_for_degrees(10, 160)
     sleep(1)
     jobb_feltet.on_for_degrees(-10, 160)
-    move(-500)
+    move(-460)
     bal_feltet.on_for_degrees(-20, 90)
 
     turn(0)
