@@ -3,8 +3,6 @@
 from time import sleep
 import time
 
-
-
 import helper
 
 from ev3dev2.motor import MoveTank, LargeMotor, MediumMotor
@@ -14,19 +12,16 @@ m = MoveTank("D", "A")
 ml = LargeMotor("D")
 mr = LargeMotor("A")
 g = GyroSensor("in2")
-bal_feltet = MediumMotor("C")
 jobb_feltet = MediumMotor("B")
+bal_feltet = MediumMotor("C")
 
+g.reset()
 g.calibrate()
 
-starttime = time.time()
-
-def run_time():
-    return time.time() - starttime
-
-def turn(degree, speed = 0.3, easein= 30, easeout = 60):
+#implement easing
+def turn(degree, speed = 0.4, easein= 30, easeout = 80):
     print("turning")
-    MIN_MOVE = 3
+    MIN_MOVE = 1
     maxdistance = degree - g.angle
     while True:
         distance = degree - g.angle
@@ -52,7 +47,7 @@ def turn(degree, speed = 0.3, easein= 30, easeout = 60):
     print(g.angle)
 
 
-def move(dist, speed = 0.8, easein = 70, easeout = 150, startgyro = None, CORRECTION_NODIFIER = 0.5):
+def move(dist, speed = 0.7, easein = 70, easeout = 200, startgyro = None, CORRECTION_NODIFIER = 1):
     print("moving")
     MIN_MOVE = 3
     if startgyro == None:
@@ -83,58 +78,49 @@ def move(dist, speed = 0.8, easein = 70, easeout = 150, startgyro = None, CORREC
         print(g.angle, startgyro, gyrooffset)
     m.off()
 
-def move_with_turn_offset(dist, speed = 0.8, easein = 100, easeout = 200, startgyro = None, CORRECTION_MODIFIER = 3, turn_offset = 0):
-    MIN_MOVE = 5
-    if startgyro == None:
-        startgyro = g.angle
-    startpos = (mr.position + ml.position) / 2
-    endpos = startpos + dist
-    maxdistance = endpos - startpos
-    print(startgyro)
-    while True:
-        currentpos = (mr.position + ml.position) / 2
-        distance = endpos - currentpos
-        gyrooffset = (startgyro - g.angle) * CORRECTION_MODIFIER
-        if helper.abs(distance) < 3:
-            break
-        if helper.abs(distance) < easeout:
-            sign = distance/helper.abs(distance)
-            move = helper.clamp(helper.abs(distance) * speed * (100/easeout), MIN_MOVE, 100) * sign
-            gyrooffset = startgyro - g.angle
-            print("easeout")
-        elif helper.abs(distance) > helper.abs(maxdistance) - easein:
-            move = helper.clamp((helper.abs(maxdistance) - helper.abs(distance)), -100, 100)
-            sign = distance / helper.abs(distance)
-            move = helper.clamp((move * speed * (100/easein) + 5) * sign, -100, 100)
-        else:
-            sign = distance / helper.abs(distance)
-            move = helper.clamp(speed * 100 * sign, -100, 100)
-        m.on(helper.clamp(move+gyrooffset-turn_offset, -100, 100), helper.clamp(move-gyrooffset + turn_offset, -100, 100))
-        # m.on(move, move)
-        print(g.angle, startgyro)
-    m.off()
+starttime = time.time()
 
+def run_time():
+    return time.time() - starttime
 
 try:
-    ##futás kód
+    move(440, speed=0.6)
+    turn(-1)
+    bal_feltet.on_for_rotations(50, -4.8, block=False)
+    sleep(0.5)
+    move(310, speed=0.30, startgyro=-1)
+    bal_feltet.on_for_rotations(100,1)
+
+    move(-200, speed=0.4)
+    turn(45)
     move(1000)
-    move(800, CORRECTION_NODIFIER=3, startgyro=0)
-    move(-200)
-    turn(25)
-    move(300)
-    turn(0)
-    bal_feltet.on_for_degrees(10, 90)
-    bal_feltet.on_for_seconds(10, 3, block=False)
-    move(-200, startgyro=0, speed=0.08)
-    move(-400, speed=0.9)
-    bal_feltet.on_for_degrees(100, -200)
-    turn(25)
-    move(1000, CORRECTION_NODIFIER=0)
-    move(-100)
-    
+    turn(-50)
+    bal_feltet.on_for_rotations(60, 3.8, block=False)
+    move(220)
+    sleep(0.5)
+    bal_feltet.on_for_rotations(100, -3.1)
+
+    turn(-87)
+    move(60, speed=0.5, CORRECTION_NODIFIER=3)
+    bal_feltet.on_for_rotations(100, -1.5)
+    move(130)
+
+    move(-30, startgyro=-87)
+    turn(-45)
+    move(-200, speed=0.4)
+    turn(42)
+    move(200)
+
+      
+
+
+    sleep(3)
 
 finally:
+
+    print(g.angle)
+
     m.off(brake=False)
     bal_feltet.off(brake=False)
-    jobb_feltet.off(brake=False)
-    print("done in", round(run_time(), 1))
+
+    print("done in", round(run_time()))

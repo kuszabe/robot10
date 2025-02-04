@@ -1,9 +1,5 @@
-#!/usr/bin/env micropython
-
 from time import sleep
 import time
-
-
 
 import helper
 
@@ -14,9 +10,10 @@ m = MoveTank("D", "A")
 ml = LargeMotor("D")
 mr = LargeMotor("A")
 g = GyroSensor("in2")
-bal_feltet = MediumMotor("C")
 jobb_feltet = MediumMotor("B")
+bal_feltet = MediumMotor("C")
 
+g.reset()
 g.calibrate()
 
 starttime = time.time()
@@ -26,7 +23,7 @@ def run_time():
 
 def turn(degree, speed = 0.3, easein= 30, easeout = 60):
     print("turning")
-    MIN_MOVE = 3
+    MIN_MOVE = 2
     maxdistance = degree - g.angle
     while True:
         distance = degree - g.angle
@@ -52,9 +49,9 @@ def turn(degree, speed = 0.3, easein= 30, easeout = 60):
     print(g.angle)
 
 
-def move(dist, speed = 0.8, easein = 70, easeout = 150, startgyro = None, CORRECTION_NODIFIER = 0.5):
+def move(dist, speed = 0.7, easein = 70, easeout = 150, startgyro = None, CORRECTION_NODIFIER = 0.5):
     print("moving")
-    MIN_MOVE = 3
+    MIN_MOVE = 2
     if startgyro == None:
         startgyro = g.angle
     startpos = (mr.position + ml.position) / 2
@@ -83,58 +80,25 @@ def move(dist, speed = 0.8, easein = 70, easeout = 150, startgyro = None, CORREC
         print(g.angle, startgyro, gyrooffset)
     m.off()
 
-def move_with_turn_offset(dist, speed = 0.8, easein = 100, easeout = 200, startgyro = None, CORRECTION_MODIFIER = 3, turn_offset = 0):
-    MIN_MOVE = 5
-    if startgyro == None:
-        startgyro = g.angle
-    startpos = (mr.position + ml.position) / 2
-    endpos = startpos + dist
-    maxdistance = endpos - startpos
-    print(startgyro)
-    while True:
-        currentpos = (mr.position + ml.position) / 2
-        distance = endpos - currentpos
-        gyrooffset = (startgyro - g.angle) * CORRECTION_MODIFIER
-        if helper.abs(distance) < 3:
-            break
-        if helper.abs(distance) < easeout:
-            sign = distance/helper.abs(distance)
-            move = helper.clamp(helper.abs(distance) * speed * (100/easeout), MIN_MOVE, 100) * sign
-            gyrooffset = startgyro - g.angle
-            print("easeout")
-        elif helper.abs(distance) > helper.abs(maxdistance) - easein:
-            move = helper.clamp((helper.abs(maxdistance) - helper.abs(distance)), -100, 100)
-            sign = distance / helper.abs(distance)
-            move = helper.clamp((move * speed * (100/easein) + 5) * sign, -100, 100)
-        else:
-            sign = distance / helper.abs(distance)
-            move = helper.clamp(speed * 100 * sign, -100, 100)
-        m.on(helper.clamp(move+gyrooffset-turn_offset, -100, 100), helper.clamp(move-gyrooffset + turn_offset, -100, 100))
-        # m.on(move, move)
-        print(g.angle, startgyro)
-    m.off()
-
-
 try:
-    ##futás kód
-    move(1000)
-    move(800, CORRECTION_NODIFIER=3, startgyro=0)
-    move(-200)
-    turn(25)
     move(300)
+    turn(45)
+    move(1000, startgyro=45)
+    move(-300)
     turn(0)
-    bal_feltet.on_for_degrees(10, 90)
-    bal_feltet.on_for_seconds(10, 3, block=False)
-    move(-200, startgyro=0, speed=0.08)
-    move(-400, speed=0.9)
-    bal_feltet.on_for_degrees(100, -200)
-    turn(25)
-    move(1000, CORRECTION_NODIFIER=0)
-    move(-100)
+    move(190)
+    turn(90, speed=0.2)
+    sleep(0.5)
+    move(440, speed=0.3, startgyro=90, CORRECTION_NODIFIER=2)
+    # move(75, speed=0.6)
     
+    move(-550, speed=0.4, startgyro=90)
+    turn(10, speed=.4)
+    move(-1200, speed=1)
 
 finally:
+
     m.off(brake=False)
-    bal_feltet.off(brake=False)
     jobb_feltet.off(brake=False)
-    print("done in", round(run_time(), 1))
+
+    print("done in", round(run_time()))
