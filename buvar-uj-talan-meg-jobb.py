@@ -88,7 +88,7 @@ try:
     turn(-1)
     bal_feltet.on_for_rotations(50, -4.8, block=False)
     sleep(0.5)
-    move(310, speed=0.30, startgyro=-1)
+    move(320, speed=0.30, startgyro=-1)
     bal_feltet.on_for_rotations(100,1)
 
     move(-200, speed=0.4)
@@ -103,15 +103,26 @@ try:
     turn(-87)
     move(60, speed=0.5, CORRECTION_NODIFIER=3)
     bal_feltet.on_for_rotations(100, -1.5)
-    move(130)
+    move(140)
 
-    move(-30, startgyro=-87)
+    move(-40, startgyro=-87)
     turn(-45)
     move(-200, speed=0.4)
-    turn(42)
+    turn(42, speed=0.3)
+    bal_feltet.on_for_rotations(100, 0.5)
     move(200)
-
-      
+    bal_feltet.on_for_rotations(100, 0.5)
+    turn(35)
+    move(-20)
+    bal_feltet.on_for_rotations(100, 0.5)
+    move(-200)
+    turn(32)
+    move(260)
+    bal_feltet.on_for_rotations(100, 2)
+    bal_feltet.on_for_rotations(100, -2)
+    move(-600)
+    turn(0)
+    move(-1000)
 
 
     sleep(3)

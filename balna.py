@@ -89,22 +89,30 @@ try:
 
     move(850)
     turn(-45)
-    move(480)
+    move(490)
     turn(45)
     move(605, startgyro=45)
-    jobb_feltet.on_for_degrees(10, 160)
+    jobb_feltet.on_for_degrees(10, 180)
     sleep(1)
-    jobb_feltet.on_for_degrees(-10, 160)
+    jobb_feltet.on_for_degrees(-10, 180)
     move(-460)
     bal_feltet.on_for_degrees(-20, 90)
 
     turn(0)
-    move(500)
+    move(430)
     bal_feltet.on_for_degrees(-20, 1800)
+
+    move(-500, speed=1)
+    bal_feltet.on_for_degrees(-20, 90)
+    turn(-45)
+    move(-900, speed=1)
+    turn(0)
+    move(-500, speed=1)
 
 finally:
     m.off(brake=False)
 
     bal_feltet.off(brake=False)
+    jobb_feltet.off(brake=False)
 
     print("done in", round(run_time(), 1))
