@@ -6,7 +6,7 @@ import helper
 from ev3dev2.motor import MoveTank, LargeMotor, MediumMotor
 from ev3dev2.sensor.lego import GyroSensor
 
-def kincs(m, ml, mr, jobb_feltet: MediumMotor, bal_feltet: MediumMotor):
+def kincs(m, ml, mr, g, jobb_feltet: MediumMotor, bal_feltet: MediumMotor):
     def turn(degree, speed = 0.3, easein= 30, easeout = 60):
         print("turning")
         MIN_MOVE = 2
@@ -29,13 +29,13 @@ def kincs(m, ml, mr, jobb_feltet: MediumMotor, bal_feltet: MediumMotor):
             # print(g.angle, distance, move)
         if degree != g.angle:
             print("elcseszte", g.angle)
-            if abs(degree - g.angle) > 5:
+            if abs(degree - g.angle) > 2:
                 turn(degree)
         m.off()
         print(g.angle)
 
 
-    def move(dist, speed = 0.7, easein = 70, easeout = 150, startgyro = None, CORRECTION_NODIFIER = 0.5):
+    def move(dist, speed = 0.9, easein = 70, easeout = 150, startgyro = None, CORRECTION_NODIFIER = 0.5):
         print("moving")
         MIN_MOVE = 2
         if startgyro == None:
@@ -66,20 +66,14 @@ def kincs(m, ml, mr, jobb_feltet: MediumMotor, bal_feltet: MediumMotor):
             print(g.angle, startgyro, gyrooffset)
         m.off()
 
-    move(300)
-    turn(45)
-    move(1000, startgyro=45)
-    move(-300)
-    turn(0)
-    move(190)
-    turn(90, speed=0.2)
-    sleep(0.5)
-    move(440, speed=0.3, startgyro=90, CORRECTION_NODIFIER=2)
-    # move(75, speed=0.6)
-
-    move(-550, speed=0.4, startgyro=90)
-    turn(10, speed=.4)
-    move(-1200, speed=1)
+    move(300, easeout=200)
+    turn(35)
+    move(815)
+    turn(92)
+    move(200, startgyro=92)
+    move(340, speed=0.3, startgyro=92)
+    move(-400, speed=0.5, startgyro=92)
+    move(-1200, startgyro=20, speed=1, CORRECTION_NODIFIER=3, easeout=200)
 
 if __name__ == "__main__":
     m = MoveTank("D", "A")
@@ -89,7 +83,6 @@ if __name__ == "__main__":
     jobb_feltet = MediumMotor("B")
     bal_feltet = MediumMotor("C")
 
-    g.reset()
     g.calibrate()
 
     starttime = time.time()
@@ -98,7 +91,7 @@ if __name__ == "__main__":
         return time.time() - starttime
 
     try:
-        kincs(m, ml, mr, jobb_feltet, bal_feltet)
+        kincs(m, ml, mr, g, jobb_feltet, bal_feltet)
 
     finally:
 

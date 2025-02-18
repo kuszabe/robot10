@@ -3,8 +3,6 @@
 from time import sleep
 import time
 
-import math
-
 import helper
 
 from ev3dev2.motor import MoveTank, LargeMotor, MediumMotor
@@ -17,7 +15,6 @@ g = GyroSensor("in2")
 jobb_feltet = MediumMotor("B")
 bal_feltet = MediumMotor("C")
 
-# bal_feltet.on_for_rotations(20, -1, block=False)
 
 g.reset()
 g.calibrate()
@@ -27,9 +24,9 @@ starttime = time.time()
 def run_time():
     return time.time() - starttime
 
-#fancy move function
-def turn(degree, speed = 0.5, easein= 30, easeout = 60):
-    MIN_MOVE = 3
+def turn(degree, speed = 0.3, easein= 30, easeout = 60):
+    print("turning")
+    MIN_MOVE = 2
     maxdistance = degree - g.angle
     while True:
         distance = degree - g.angle
@@ -48,12 +45,16 @@ def turn(degree, speed = 0.5, easein= 30, easeout = 60):
         m.on(move, -move)
         # print(g.angle, distance, move)
     if degree != g.angle:
-        print("elcseszte", g.angle, degree)
+        print("elcseszte", g.angle)
+        if abs(degree - g.angle) > 5:
+            turn(degree)
     m.off()
+    print(g.angle)
 
 
-def move(dist, speed = 0.7, easein = 100, easeout = 200, startgyro = None, CORRECTION_NODIFIER = 3):
-    MIN_MOVE = 5
+def move(dist, speed = 0.7, easein = 70, easeout = 150, startgyro = None, CORRECTION_NODIFIER = 0.5):
+    print("moving")
+    MIN_MOVE = 2
     if startgyro == None:
         startgyro = g.angle
     startpos = (mr.position + ml.position) / 2
@@ -64,7 +65,7 @@ def move(dist, speed = 0.7, easein = 100, easeout = 200, startgyro = None, CORRE
     while True:
         currentpos = (mr.position + ml.position) / 2
         distance = endpos - currentpos
-        if helper.abs(distance) < 2:
+        if helper.abs(distance) < 3:
             break
         if helper.abs(distance) < easeout:
             sign = distance/helper.abs(distance)
@@ -77,70 +78,89 @@ def move(dist, speed = 0.7, easein = 100, easeout = 200, startgyro = None, CORRE
             sign = distance / helper.abs(distance)
             move = helper.clamp(speed * 100 * sign, -100, 100)
         gyrooffset = (startgyro - g.angle) * CORRECTION_NODIFIER * abs(move / 100)
+        m.on(helper.clamp(move+gyrooffset, -100, 100), helper.clamp(move-gyrooffset, -100, 100))
         #írd ki a jelenlegi szögértéket és a startgyro értékét és a gyrooffset értékét
         print(g.angle, startgyro, gyrooffset)
-        m.on(helper.clamp(move+gyrooffset, -100, 100), helper.clamp(move-gyrooffset, -100, 100))
     m.off()
-    if startgyro != g.angle:
-        print("a menés végén rossz volt az angle", g.angle)
+
+
+
 try:
-    bal_feltet.on_for_rotations(30, 2.1, block=False)
-    move(280)
-    turn(20)
-    move(400, startgyro=20)
-    turn(-5)
-    move(300, startgyro=-5)
+    move(490, speed=0.5)
+    bal_feltet.on_for_rotations(60, -4.7, block=False)
+    move(330, speed=0.245, startgyro=0)
+    bal_feltet.on_for_rotations(100, 1.2)
 
-    #collects the two
-    turn(37)
-    move(530, startgyro=37)
+    sleep(0.2)
 
+    move(-110, speed=0.5)
+    turn(28)
+    move(270)
+    bal_feltet.on_for_rotations(100, 2.7)
+    turn(15, easeout=1)
+
+    bal_feltet.on_for_rotations(100, -2.5)
+    move(130)
+    turn(-8)
+    bal_feltet.on_for_rotations(100, -1.7)
+    turn(52, speed=0.5)
+    bal_feltet.on_for_rotations(100, 1.7, block=False)
+    move(375)
+    turn(0, speed=0.5)
+    move(450)
+    turn(90, speed=0.5)
+    bal_feltet.on_for_rotations(100, -1)
     turn(80)
+    bal_feltet.on_for_rotations(100, 1)
+    turn(90)
 
-    move(920, startgyro=80)
+    bal_feltet.on_for_rotations(100,-1.5)
+    turn(50)
+    move(50)
+    bal_feltet.on_for_rotations(100, 4)
 
-    bal_feltet.on_for_rotations(30, -0.9, block=False)
-    
+    bal_feltet.on_for_rotations(100, -2.5)
+    turn(-80)
+    bal_feltet.on_for_rotations(100, 3)
 
-    #itt fordul rá a karikára
-    turn(0, speed=0.4)
+    bal_feltet.on_for_rotations(100, -4, block=False)
+    sleep(0.5)
+    turn(10)
+    move(-2000, speed=1)
 
-    move(140, speed=0.4)
+    # move(490, speed=0.5, CORRECTION_NODIFIER=1)
+    # bal_feltet.on_for_rotations(100, -4.9, block=False)
+    # move(310, speed=0.24, startgyro=0, CORRECTION_NODIFIER=3)
+    # bal_feltet.on_for_rotations(100, 1.2)
 
-    #actual lifting
-    jobb_feltet.on_for_degrees(20, -250, block=False)
+    # move(-390)
+    # turn(33)
+    # bal_feltet.on_for_rotations(100, 1.1, block=False)
+    # move(1210)
+    # turn(-90, speed=0.2)
+    # bal_feltet.on_for_rotations(100, -1)
+    # move(235, speed=0.2, CORRECTION_NODIFIER=3, startgyro=-90)
+    # bal_feltet.on_for_rotations(100, -1.2)
+    # move(100)
+    # move(-100)
+    # turn(-30)
+    # move(-390)
+    # bal_feltet.on_for_rotations(100, 0.9, block=False)
+    # turn(26, speed=0.2)
+    # move(330)
+    # bal_feltet.on_for_rotations(100, 0.7)
+    # move(-200)
+    # turn(-50)
+    # move(300)
+    # bal_feltet.on_for_rotations(100, 3)
+    # sleep(0.5)
+    # bal_feltet.on_for_rotations(100, -3)
+    # turn(40)
+    # sleep(1)
 
-    bal_feltet.on_for_rotations(20, 1.5)
 
-    
-
-    input()
-
-    
-    #elkezd átmenni a pálya másik oldalára
-    bal_feltet.on_for_rotations(100, -2.1, block=False)
-
-    turn(95, speed=0.3)
-
-
-    move(1200)
-
-    turn(77)
-
-    move(530)
-
-    turn(180)
-
-    move(1000)
-
-
-    turn(90+45)
-    move(-500)
-    move(1000)
-
-    
 finally:
     m.off(brake=False)
-    jobb_feltet.off(brake=False)
     bal_feltet.off(brake=False)
-    print("\n", run_time())
+    jobb_feltet.off(brake=False)
+    print("done in", round(run_time()))

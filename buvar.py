@@ -19,14 +19,8 @@ mr = LargeMotor("A")
 g = GyroSensor("in2")
 bal_feltet = MediumMotor("C")
 
-
-
-g.reset()
-g.calibrate()
-
 #fancy move function
-#implement easing
-def turn(degree, speed = 0.5, easein= 60, easeout = 120):
+def turn(degree, speed = 0.8, easein= 60, easeout = 120):
     MIN_MOVE = 5
     maxdistance = degree - g.angle
     while True:
@@ -49,13 +43,14 @@ def turn(degree, speed = 0.5, easein= 60, easeout = 120):
         print("elcseszte", g.angle)
     m.off()
 
-def move(dist, speed = 0.5, easein = 100, easeout = 200, startgyro = None):
+def move(dist, speed = 0.8, easein = 100, easeout = 200, startgyro = None, CORRECTION_NODIFIER = 1):
     MIN_MOVE = 2
     if startgyro == None:
         startgyro = g.angle
     startpos = (mr.position + ml.position) / 2
     endpos = startpos + dist
     maxdistance = endpos - startpos
+    #írd ki a startgyro értékét
     print(startgyro)
     while True:
         currentpos = (mr.position + ml.position) / 2
@@ -72,68 +67,62 @@ def move(dist, speed = 0.5, easein = 100, easeout = 200, startgyro = None):
         else:
             sign = distance / helper.abs(distance)
             move = helper.clamp(speed * 100 * sign, -100, 100)
-        gyrooffset = startgyro - g.angle
+        gyrooffset = (startgyro - g.angle) * CORRECTION_NODIFIER * move / 100
         m.on(helper.clamp(move+gyrooffset, -100, 100), helper.clamp(move-gyrooffset, -100, 100))
-        # m.on(move, move)
-        print(g.angle, startgyro)
-    m.off()
-
-
-def move_steer(dist, angle, maxturn = 10, speed = 0.5, easein = 100, easeout = 100):
-    startpos = (mr.position + ml.position) / 2
-    endpos = startpos + dist
-    maxdistance = endpos - startpos
-    print(angle)
-    while True:
-        currentpos = (mr.position + ml.position) / 2
-        distance = endpos - currentpos
-        steer = helper.clamp(angle - g.angle, -maxturn, maxturn)
-        if helper.abs(distance) < 3:
-            break
-        if helper.abs(distance) < easeout:
-            move = distance * speed * (100/easeout)
-        elif helper.abs(distance) > helper.abs(maxdistance) - easein:
-            move = helper.clamp((helper.abs(maxdistance) - helper.abs(distance)), -100, 100)
-            sign = distance / helper.abs(distance)
-            move = helper.clamp((move * speed * (100/easein) + 5) * sign, -100, 100)
-            steer = 0
-        else:
-            sign = distance / helper.abs(distance)
-            move = helper.clamp(speed * 100 * sign, -100, 100)
-        m.on(helper.clamp(move+steer, -100, 100), helper.clamp(move-steer, -100, 100))
+        #írd ki a jelenlegi szögértéket és a startgyro értékét és a gyrooffset értékét
+        print(gyrooffset, g.angle, startgyro)
     m.off()
 
 
 
 ##futás kód
+g.calibrate()
+try:
+    move(490, speed=0.5)
+    bal_feltet.on_for_rotations(60, -4.7, block=False)
+    move(330, speed=0.245, startgyro=0)
+    bal_feltet.on_for_rotations(100, 1.2)
 
-move(480, startgyro=2)
-full_emeles = run_time()
-bal_feltet.on_for_rotations(100, -10.7, block=False)
-turn(0)
-move(330, speed=0.15, startgyro=1)
-full_emeles = run_time() - full_emeles
-bal_feltet.on_for_rotations(100, 2.5)
+    sleep(0.2)
 
-move(-110)
-turn(28)
-move(250)
-bal_feltet.on_for_rotations(100, 6)
-turn(15, easeout=1)
+    move(-110, speed=0.5)
+    turn(28)
+    move(270)
+    bal_feltet.on_for_rotations(100, 2.7)
+    turn(15, easeout=1)
 
-bal_feltet.on_for_rotations(100, -6)
-move(135)
-turn(-5)
-bal_feltet.on_for_rotations(100, -2.5)
-turn(50)
-move_steer(750, 0, easein=50, maxturn=15)
-turn(90)
+    bal_feltet.on_for_rotations(100, -2.5)
+    move(130)
+    turn(-8)
+    bal_feltet.on_for_rotations(100, -1.7)
+    turn(52, speed=0.5)
+    bal_feltet.on_for_rotations(100, 1.7, block=False)
+    move(375)
+    turn(0, speed=0.5)
+    move(450)
+    turn(90, speed=0.5)
+    bal_feltet.on_for_rotations(100, -1)
+    turn(80)
+    bal_feltet.on_for_rotations(100, 1)
+    turn(90)
 
+    bal_feltet.on_for_rotations(100,-1.5)
+    turn(50)
+    move(50)
+    bal_feltet.on_for_rotations(100, 4)
 
+    bal_feltet.on_for_rotations(100, -2.5)
+    turn(-80)
+    bal_feltet.on_for_rotations(100, 3)
 
-m.off(brake=False)
+    bal_feltet.on_for_rotations(100, -4, block=False)
+    sleep(0.5)
+    turn(10)
+    move(-2000, speed=1)
 
-bal_feltet.off(brake=False)
+finally:
+    m.off(brake=False)
 
-print("done in", round(run_time(), 1))
-print("full emelés", round(full_emeles, 1))
+    bal_feltet.off(brake=False)
+
+    print("done in", round(run_time(), 1))
